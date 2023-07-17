@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// An exception thrown when the email could not be sent.
@@ -19,7 +20,21 @@ class UrlLaunchException implements Exception {}
 /// {@endtemplate}
 class UrlLauncherService {
   /// {@macro url_launcher_service}
-  const UrlLauncherService();
+  const UrlLauncherService() : _urlLauncherResponse = null;
+
+  /// A named constructor of the [UrlLauncherService] for testing purposes in
+  /// which it is possible to predefine some variables.
+  ///
+  /// ```dart
+  /// final urlLauncherService = UrlLauncherService.test(
+  ///   urlLauncherResponse: true,
+  /// );
+  /// ```
+  @visibleForTesting
+  const UrlLauncherService.test({required bool urlLauncherResponse})
+      : _urlLauncherResponse = urlLauncherResponse;
+
+  final bool? _urlLauncherResponse;
 
   /// Sends an email to the given [emailUri].
   ///
@@ -28,7 +43,7 @@ class UrlLauncherService {
     try {
       if (!emailUri.isScheme('mailto')) throw Exception();
 
-      final isSuccess = await launchUrl(emailUri);
+      final isSuccess = _urlLauncherResponse ?? await launchUrl(emailUri);
 
       if (!isSuccess) throw Exception();
     } catch (_) {
@@ -44,7 +59,7 @@ class UrlLauncherService {
     try {
       if (!url.isScheme('http') && !url.isScheme('https')) throw Exception();
 
-      final isSuccess = await launchUrl(url);
+      final isSuccess = _urlLauncherResponse ?? await launchUrl(url);
 
       if (!isSuccess) throw Exception();
     } catch (_) {
